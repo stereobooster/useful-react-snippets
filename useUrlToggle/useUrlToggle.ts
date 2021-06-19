@@ -28,14 +28,14 @@ const newPath = (name: string, initialValue: boolean, newValue: boolean) =>
  *
  * @param name - flag in the URL
  * @param initialValue - the same as in `useState(initialValue)`
- * @param blocked - prevents change of the state, for example,
- *  if there are no selected items we can't show delete modal.
+ * @param precondition - prevents change of the state, for example,
+ *  if there are no selected items we can't show delete dialog.
  *  As well it will block forward button and replace flag on the first load - for concistency
  */
 export const useUrlToggle = (
   name: string,
   initialValue: boolean,
-  blocked?: boolean
+  precondition?: boolean
 ) => {
   const history = useHistory();
 
@@ -44,18 +44,18 @@ export const useUrlToggle = (
     decode(getSearchParams(window.location.search)[name], initialValue)
   );
 
-  const blockedRef = useRef(blocked);
-  blockedRef.current = blocked;
+  const preconditionRef = useRef(precondition);
+  preconditionRef.current = precondition;
 
   const [state, setState] = useState(
-    blockedRef.current === false ? initialValue : initialUrlValue
+    preconditionRef.current === false ? initialValue : initialUrlValue
   );
   const currentStateRef = useRef(state);
   const navigatedWithHook = useRef(false);
 
   useEffect(
     () => {
-      if (blockedRef.current === false && initialUrlValue !== initialValue) {
+      if (preconditionRef.current === false && initialUrlValue !== initialValue) {
         history.replace(newPath(name, initialValue, initialValue), {});
       }
     },
@@ -72,7 +72,7 @@ export const useUrlToggle = (
           initialValue
         );
         if (
-          blockedRef.current === false &&
+          preconditionRef.current === false &&
           currentStateRef.current !== current
         ) {
           history.goBack();
@@ -81,12 +81,12 @@ export const useUrlToggle = (
         currentStateRef.current = current;
         setState(current);
       }),
-    [name, blockedRef, initialValue, history]
+    [name, preconditionRef, initialValue, history]
   );
 
   const setStateWithHistory = useCallback(
     (newValue: boolean) => {
-      if (blockedRef.current === false) return;
+      if (preconditionRef.current === false) return;
 
       const oldValue = currentStateRef.current;
       if (oldValue !== newValue) {
@@ -100,7 +100,7 @@ export const useUrlToggle = (
         setState(newValue);
       }
     },
-    [name, blockedRef, initialValue, history, currentStateRef]
+    [name, preconditionRef, initialValue, history, currentStateRef]
   );
 
   return [state, setStateWithHistory] as const;
