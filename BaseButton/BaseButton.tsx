@@ -15,6 +15,7 @@ export const focusRing = (color: string = "blue", inset?: boolean) => ({
     outline: "none",
   },
   ":focus-visible": {
+    // https://css-tricks.com/platform-news-rounded-outlines-gpu-accelerated-svg-animations-how-css-variables-are-resolved/#rounded-outlines-are-coming-to-firefox
     "box-shadow": inset
       ? `inset 0 0 0 3px ${color}`
       : `0 0 0 2px #fff, 0 0 0 5px ${color}`,
@@ -56,7 +57,10 @@ export const BaseButton = styled.button`
   -webkit-font-smoothing: inherit;
   -moz-osx-font-smoothing: inherit;
 
-  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
+  cursor: pointer;
+  :disabled {
+    cursor: default;
+  }
 
   /* Corrects inability to style clickable input types in iOS */
   -webkit-appearance: none;
