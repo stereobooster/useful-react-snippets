@@ -1,4 +1,4 @@
-# React hook to select multiple items with a shift key
+# React hook to select multiple items with a shift
 
 Imagine you have a list (or a table) with checkboxes, for example, to do list, mail inbox, or "back-office" page. Checkboxes are used to select items for batch actions, for example, delete or archive, etc.
 
@@ -109,7 +109,7 @@ Source code:
 
 ## Code with a hook
 
-What I like about it, is that I don't need to change a lot original code:
+What I like about it, is that I don't need to change a lot of original code:
 
 ```diff
 const { selected, change } = useSelected([] as Array<Item>);

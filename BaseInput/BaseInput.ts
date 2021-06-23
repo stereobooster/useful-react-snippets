@@ -24,6 +24,7 @@ export const focusRing = (color: string = "blue", inset?: boolean) => ({
  * - default state
  * - `:disabled`
  * - `:focus-visible`
+ * - `:read-only`
  *
  * And maybe
  *
