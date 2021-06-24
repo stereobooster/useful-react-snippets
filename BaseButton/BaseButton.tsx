@@ -1,27 +1,10 @@
 import styled from "styled-components";
+import { focusRing } from "../focusRing";
 
 if (typeof document !== "undefined") {
   // https://alxgbsn.co.uk/2011/10/17/enable-css-active-pseudo-styles-in-mobile-safari/
   document.addEventListener("touchstart", function () {}, false);
 }
-
-export const focusRing = (color: string = "blue", inset?: boolean) => ({
-  /* Remove excess padding and border in Firefox 4+ */
-  "::-moz-focus-inner": {
-    border: 0,
-    padding: 0,
-  },
-  ":focus": {
-    outline: "none",
-  },
-  ":focus-visible": {
-    // https://css-tricks.com/platform-news-rounded-outlines-gpu-accelerated-svg-animations-how-css-variables-are-resolved/#rounded-outlines-are-coming-to-firefox
-    "box-shadow": inset
-      ? `inset 0 0 0 3px ${color}`
-      : `0 0 0 2px #fff, 0 0 0 5px ${color}`,
-  },
-  transition: `box-shadow 100ms ease-in-out`,
-});
 
 /**
  * reset built-in styles of a button https://css-tricks.com/overriding-default-button-styles/
@@ -47,13 +30,13 @@ export const BaseButton = styled.button`
 
   background: transparent;
 
-  /* inherit font & color from ancestor */
+  // inherit font & color from ancestor
   color: inherit;
   font: inherit;
   text-align: inherit;
   text-transform: inherit;
 
-  /* Corrects font smoothing for webkit */
+  // Corrects font smoothing for webkit
   -webkit-font-smoothing: inherit;
   -moz-osx-font-smoothing: inherit;
 
@@ -62,7 +45,7 @@ export const BaseButton = styled.button`
     cursor: default;
   }
 
-  /* Corrects inability to style clickable input types in iOS */
+  // Corrects inability to style clickable input types in iOS
   -webkit-appearance: none;
 
   user-select: none;
