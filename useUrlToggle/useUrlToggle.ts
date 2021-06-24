@@ -55,7 +55,10 @@ export const useUrlToggle = (
 
   useEffect(
     () => {
-      if (preconditionRef.current === false && initialUrlValue !== initialValue) {
+      if (
+        preconditionRef.current === false &&
+        initialUrlValue !== initialValue
+      ) {
         history.replace(newPath(name, initialValue, initialValue), {});
       }
     },
@@ -86,7 +89,8 @@ export const useUrlToggle = (
 
   const setStateWithHistory = useCallback(
     (newValue: boolean) => {
-      if (preconditionRef.current === false) return;
+      if (preconditionRef.current === false && newValue !== initialValue)
+        return;
 
       const oldValue = currentStateRef.current;
       if (oldValue !== newValue) {
