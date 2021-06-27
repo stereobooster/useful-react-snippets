@@ -50,7 +50,7 @@ type HistoryState<T> =
   | undefined;
 
 export const useUrlState = <T extends Record<string, JSONValue>>(
-  initialStateBase: T,
+  initialStateBase: T | (() => T),
   {
     decode,
     focusRef,
@@ -146,7 +146,7 @@ export const useUrlState = <T extends Record<string, JSONValue>>(
 
   const setStateWithCallback = useCallback(
     (newState: T | ((x: T) => T)) => {
-      if (typeof newState === "function") {
+      if (newState instanceof Function) {
         newState = newState(previousStateRef.current);
       }
       setStateWithHistory(newState);
