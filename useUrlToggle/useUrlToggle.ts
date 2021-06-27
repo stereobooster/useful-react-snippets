@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useHistory } from "react-router";
 import qs from "qs";
 import omitBy from "lodash/omitBy";
-
-const getSearchParams = (search: string) =>
-  qs.parse(search.replace("?", "")) || {};
+import { useHistory } from "react-router";
+import { History } from "history";
+import { getSearchParams } from "../getSearchParams";
 
 const decode = (urlValue: any, initialValue: boolean) => {
   if (urlValue === undefined) return initialValue;
@@ -22,6 +21,13 @@ const newPath = (name: string, initialValue: boolean, newValue: boolean) =>
     )
   )}${window.location.hash}`;
 
+type HistoryState =
+  | {
+      key?: string;
+      newValue: boolean;
+    }
+  | undefined;
+
 /**
  * Hook similar to `useState`, but mirrors value in the URL.
  * Creates at most one history entry - we don't want to polute users history.
@@ -37,7 +43,7 @@ export const useUrlToggle = (
   initialValue: boolean,
   precondition?: boolean
 ) => {
-  const history = useHistory();
+  const history: History<HistoryState> = useHistory();
 
   // memoization
   const [initialUrlValue] = useState(() =>
@@ -50,16 +56,14 @@ export const useUrlToggle = (
   const [state, setState] = useState(
     preconditionRef.current === false ? initialValue : initialUrlValue
   );
-  const currentStateRef = useRef(state);
-  const navigatedWithHook = useRef(false);
-
   useEffect(
     () => {
-      if (
-        preconditionRef.current === false &&
-        initialUrlValue !== initialValue
-      ) {
-        history.replace(newPath(name, initialValue, initialValue), {});
+      const newValue = initialUrlValue;
+      if (preconditionRef.current === false && newValue !== initialValue) {
+        history.replace(newPath(name, initialValue, initialValue), {
+          key: name,
+          newValue: initialValue,
+        });
       }
     },
     // we only want to execute this hook once for initial load
@@ -67,42 +71,59 @@ export const useUrlToggle = (
     []
   );
 
+  const currentStateRef = useRef(state);
+
   useEffect(
     () =>
-      history.listen(() => {
-        const current = decode(
-          getSearchParams(window.location.search)[name],
-          initialValue
-        );
+      history.listen((location) => {
+        let newValue: boolean;
+        const locationState = location.state;
         if (
-          preconditionRef.current === false &&
-          currentStateRef.current !== current
+          locationState &&
+          typeof locationState === "object" &&
+          locationState.key
         ) {
+          if (locationState.key === name) {
+            newValue = locationState.newValue;
+          }
+        }
+        // @ts-ignore
+        if (newValue === undefined) {
+          newValue = decode(
+            getSearchParams(window.location.search)[name],
+            initialValue
+          );
+        }
+
+        if (preconditionRef.current === false && newValue !== initialValue) {
           history.goBack();
           return;
         }
-        currentStateRef.current = current;
-        setState(current);
+
+        currentStateRef.current = newValue;
+        setState(newValue);
       }),
     [name, preconditionRef, initialValue, history]
   );
 
+  const navigatedWithHook = useRef(false);
   const setStateWithHistory = useCallback(
     (newValue: boolean) => {
       if (preconditionRef.current === false && newValue !== initialValue)
         return;
+      if (currentStateRef.current === newValue) return;
 
-      const oldValue = currentStateRef.current;
-      if (oldValue !== newValue) {
-        if (newValue === initialValue && navigatedWithHook.current) {
-          history.goBack();
-        } else {
-          history.push(newPath(name, initialValue, newValue), {});
-        }
+      if (newValue === initialValue && navigatedWithHook.current) {
+        history.goBack();
+      } else {
         navigatedWithHook.current = true;
-        currentStateRef.current = newValue;
-        setState(newValue);
+        history.push(newPath(name, initialValue, newValue), {
+          key: name,
+          newValue,
+        });
       }
+      currentStateRef.current = newValue;
+      setState(newValue);
     },
     [name, preconditionRef, initialValue, history, currentStateRef]
   );
