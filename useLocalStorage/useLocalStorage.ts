@@ -49,7 +49,7 @@ type Serializer<S> = {
  * const Arson = ArsonBase as Serializer<ARSONValue>
  *
  * const [state, setState] = useLocalStorage('state', x, Arson)
- *
+ *```
  */
 export function useLocalStorage<T extends S, S = JSONValue>(
   key: string,
